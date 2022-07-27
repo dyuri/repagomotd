@@ -20,6 +20,9 @@ var WIDGETS = map[string]widgets.WidgetFn{
 	"sysinfo": widgets.SysinfoWidget,
 }
 
+const widgetWidth = 78
+const widgetPadding = 2
+
 func format(fg, bg string, bold bool) func(string) string {
 	var style lipgloss.Style
 	if fg == "" {
@@ -42,9 +45,9 @@ func renderWidgets(v *viper.Viper) {
 	boxStyle := lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderForeground(lipgloss.Color("4")).
-		Width(78).
-		PaddingLeft(2).
-		PaddingRight(2)
+		Width(widgetWidth).
+		PaddingLeft(widgetPadding).
+		PaddingRight(widgetPadding)
 
 	// terminal => restrict max width
 	if term.IsTerminal(int(os.Stdout.Fd())) {
@@ -62,7 +65,12 @@ func renderWidgets(v *viper.Viper) {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "error rendering widget: %s - %s\n", widget, err)
 			} else {
-				display.WriteString(boxStyle.Render(output))
+				content := output.Content
+				if output.Place == "center" {
+					content = lipgloss.PlaceHorizontal(lipgloss.Width(content), lipgloss.Left, lipgloss.NewStyle().Background(lipgloss.Color("0")).Render(content))
+					content = lipgloss.PlaceHorizontal(widgetWidth-2*widgetPadding, lipgloss.Center, content)
+				}
+				display.WriteString(boxStyle.Render(content))
 				display.WriteString("\n")
 			}
 		}

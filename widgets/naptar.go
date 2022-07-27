@@ -381,7 +381,7 @@ var nevnapok = map[string]string{
 }
 
 // NaptarWidget is a widget that displays calendar information
-func NaptarWidget(v *viper.Viper, f formatFn) (string, error) {
+func NaptarWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 	content := strings.Builder{}
 
 	currentTime := time.Now()
@@ -418,7 +418,11 @@ func NaptarWidget(v *viper.Viper, f formatFn) (string, error) {
 		f2(fmt.Sprintf("%02d", currentTime.Second())),
 	)
 	fmt.Fprintf(&content, "Boldog névnapot kedves %s nevű felhasználóinknak!\n", f3(nevnapok[nevnapKey]))
-	fmt.Fprintf(&content, "Elkövetkezendő névnapok: %s; %s; %s\n", f4(nevnapok[nevnapKey2]), f4(nevnapok[nevnapKey3]), f4(nevnapok[nevnapKey4]))
+	fmt.Fprintf(&content, "Elkövetkezendő névnapok: %s; %s; %s", f4(nevnapok[nevnapKey2]), f4(nevnapok[nevnapKey3]), f4(nevnapok[nevnapKey4]))
 
-	return content.String(), nil
+	return WidgetResponse{
+		"naptar",
+		content.String(),
+		"",
+	}, nil
 }

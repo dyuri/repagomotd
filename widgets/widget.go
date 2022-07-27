@@ -5,4 +5,10 @@ import (
 )
 
 type formatFn func(string, string, bool) func(string) string
-type WidgetFn func(*viper.Viper, formatFn) (string, error)
+type WidgetFn func(*viper.Viper, formatFn) (WidgetResponse, error)
+
+type WidgetResponse struct {
+	Name    string
+	Content string
+	Place   string
+}

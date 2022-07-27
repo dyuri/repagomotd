@@ -10,7 +10,7 @@ import (
 )
 
 // SysinfoWidget is a widget that displays the host banner
-func SysinfoWidget(v *viper.Viper, f formatFn) (string, error) {
+func SysinfoWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 	var si sysinfo.SysInfo
 	si.GetSysInfo()
 
@@ -79,5 +79,9 @@ func SysinfoWidget(v *viper.Viper, f formatFn) (string, error) {
 		}
 	}
 
-	return sb.String(), nil
+	return WidgetResponse{
+		"sysinfo",
+		sb.String(),
+		"",
+	}, nil
 }
