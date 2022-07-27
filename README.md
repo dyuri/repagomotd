@@ -1,0 +1,2 @@
+# repagomotd
+Configurable MOTD
