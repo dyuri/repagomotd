@@ -1,2 +1,2 @@
-# repagomotd
+# go-repamotd
 Configurable MOTD
