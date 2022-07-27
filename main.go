@@ -7,29 +7,63 @@ import (
 	"path"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/dyuri/go-repamotd/widgets"
 	"github.com/spf13/viper"
+	"golang.org/x/term"
 )
 
-type widgetFn func(*viper.Viper) (string, error)
-
 // WIDGETS contains the available widgets
-var WIDGETS = map[string]widgetFn{
+var WIDGETS = map[string]widgets.WidgetFn{
 	"naptar":  widgets.NaptarWidget,
 	"banner":  widgets.BannerWidget,
 	"sysinfo": widgets.SysinfoWidget,
 }
 
+func format(fg, bg string, bold bool) func(string) string {
+	var style lipgloss.Style
+	if fg == "" {
+		fg = "7"
+	}
+	style = lipgloss.NewStyle().Foreground(lipgloss.Color(fg))
+	if bg != "" {
+		style = style.Background(lipgloss.Color(bg))
+	}
+	if bold {
+		style = style.Bold(true)
+	}
+
+	return style.Render
+}
+
 // TODO parallelize
 func renderWidgets(v *viper.Viper) {
 	var display = strings.Builder{}
+	boxStyle := lipgloss.NewStyle().
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("4")).
+		Width(78).
+		PaddingLeft(2).
+		PaddingRight(2)
+
+	// terminal => restrict max width
+	if term.IsTerminal(int(os.Stdout.Fd())) {
+		w, _, err := term.GetSize(int(os.Stdout.Fd()))
+		if err == nil {
+			boxStyle = boxStyle.MaxWidth(w)
+		} else {
+			boxStyle = boxStyle.MaxWidth(80)
+		}
+	}
+
 	for _, widget := range v.GetStringSlice("widgets") {
 		if fn, ok := WIDGETS[widget]; ok {
-			output, err := fn(v)
+			output, err := fn(v, format)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "error rendering widget: %s - %s\n", widget, err)
 			} else {
-				display.WriteString(output)
+				display.WriteString(boxStyle.Render(output))
+				display.WriteString("\n")
 			}
 		}
 	}

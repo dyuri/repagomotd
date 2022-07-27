@@ -10,7 +10,7 @@ import (
 )
 
 // SysinfoWidget is a widget that displays the host banner
-func SysinfoWidget(v *viper.Viper) (string, error) {
+func SysinfoWidget(v *viper.Viper, f formatFn) (string, error) {
 	var si sysinfo.SysInfo
 	si.GetSysInfo()
 
@@ -66,14 +66,17 @@ func SysinfoWidget(v *viper.Viper) (string, error) {
 
 	// Network
 	sb.WriteString("network:\n")
-	for _, net := range si.Network {
+	for i, net := range si.Network {
 		sb.WriteString("  ")
 		sb.WriteString(net.Name)
 		sb.WriteString(" [")
 		sb.WriteString(fmt.Sprint(net.MACAddress))
 		sb.WriteString(" ")
 		sb.WriteString(fmt.Sprint(net.Speed))
-		sb.WriteString("Mbps]\n")
+		sb.WriteString("Mbps]")
+		if i < len(si.Network)-1 {
+			sb.WriteString("\n")
+		}
 	}
 
 	return sb.String(), nil

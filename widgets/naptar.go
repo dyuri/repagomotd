@@ -381,7 +381,7 @@ var nevnapok = map[string]string{
 }
 
 // NaptarWidget is a widget that displays calendar information
-func NaptarWidget(v *viper.Viper) (string, error) {
+func NaptarWidget(v *viper.Viper, f formatFn) (string, error) {
 	content := strings.Builder{}
 
 	currentTime := time.Now()
@@ -398,11 +398,27 @@ func NaptarWidget(v *viper.Viper) (string, error) {
 	nevnapKey3 := fmt.Sprintf("%02d%02d", holnaputan.Month(), holnaputan.Day())
 	nevnapKey4 := fmt.Sprintf("%02d%02d", holnaputan2.Month(), holnaputan2.Day())
 
-	fmt.Fprintf(&content, "Ma %s van, %d. %s %d.\n", nap, currentTime.Year(), honap, currentTime.Day())
-	fmt.Fprintf(&content, "Ez az év %d. hete és %d. napja, %d nap van hátra az évből.\n", iweek, currentTime.YearDay(), lastDayOfYear-currentTime.YearDay())
-	fmt.Fprintf(&content, "Aktuális idő: %02d óra %02d perc és %02d másodperc.\n", currentTime.Hour(), currentTime.Minute(), currentTime.Second())
-	fmt.Fprintf(&content, "Boldog névnapot kedves %s nevű felhasználóinknak!\n", nevnapok[nevnapKey])
-	fmt.Fprintf(&content, "Elkövetkezendő névnapok: %s; %s; %s\n", nevnapok[nevnapKey2], nevnapok[nevnapKey3], nevnapok[nevnapKey4])
+	f1 := f("10", "", true)
+	f2 := f("10", "", false)
+	f3 := f("11", "", true)
+	f4 := f("3", "", false)
+
+	fmt.Fprintf(&content, "Ma %s van, %s\n",
+		f1(nap),
+		f2(fmt.Sprintf("%d. %s %d.", currentTime.Year(), honap, currentTime.Day())),
+	)
+	fmt.Fprintf(&content, "Ez az év %s. hete és %s. napja, %s nap van hátra az évből.\n",
+		f2(fmt.Sprint(iweek)),
+		f2(fmt.Sprint(currentTime.YearDay())),
+		f2(fmt.Sprint(lastDayOfYear-currentTime.YearDay())),
+	)
+	fmt.Fprintf(&content, "Aktuális idő: %s óra %s perc és %s másodperc.\n",
+		f2(fmt.Sprintf("%02d", currentTime.Hour())),
+		f2(fmt.Sprintf("%02d", currentTime.Minute())),
+		f2(fmt.Sprintf("%02d", currentTime.Second())),
+	)
+	fmt.Fprintf(&content, "Boldog névnapot kedves %s nevű felhasználóinknak!\n", f3(nevnapok[nevnapKey]))
+	fmt.Fprintf(&content, "Elkövetkezendő névnapok: %s; %s; %s\n", f4(nevnapok[nevnapKey2]), f4(nevnapok[nevnapKey3]), f4(nevnapok[nevnapKey4]))
 
 	return content.String(), nil
 }
