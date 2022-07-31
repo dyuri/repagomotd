@@ -34,6 +34,8 @@ func format(fg, bg string, bold bool) func(string) string {
 	}
 	if bold {
 		style = style.Bold(true)
+	} else {
+		style = style.Bold(false)
 	}
 
 	return style.Render
@@ -66,6 +68,10 @@ func renderWidgets(v *viper.Viper) {
 				fmt.Fprintf(os.Stderr, "error rendering widget: %s - %s\n", widget, err)
 			} else {
 				content := output.Content
+				length := len([]rune(content))
+				if length > 0 && content[length-1] == '\n' {
+					content = content[:length-1]
+				}
 				if output.Place == "center" {
 					content = lipgloss.PlaceHorizontal(lipgloss.Width(content), lipgloss.Left, lipgloss.NewStyle().Background(lipgloss.Color("0")).Render(content))
 					content = lipgloss.PlaceHorizontal(widgetWidth-2*widgetPadding, lipgloss.Center, content)

@@ -3,80 +3,105 @@ package widgets
 import (
 	"fmt"
 	"strings"
+	"time"
 
-	"github.com/mackerelio/go-osstat/memory"
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/host"
+	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/viper"
 	"github.com/zcalusic/sysinfo"
 )
+
+// TODO sysinfo => gopsutil
 
 // SysinfoWidget is a widget that displays the host banner
 func SysinfoWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 	var si sysinfo.SysInfo
 	si.GetSysInfo()
 
+	f1 := f("7", "0", false)
+	f2 := f("11", "0", false)
+	f3 := f("2", "0", false)
+	f4 := f("10", "0", true)
 	sb := strings.Builder{}
 
+	addLine := func(title, value string) {
+		fmt.Fprintf(&sb, "%s %s\n", f1(fmt.Sprintf("%9s", title)), value)
+	}
+
+	hostinfo, _ := host.Info()
+
 	// node
-	sb.WriteString("host: ")
-	sb.WriteString(si.Node.Hostname)
-	sb.WriteString("\n")
+	addLine("host:", f2(hostinfo.Hostname))
 
 	// os
-	sb.WriteString("os: ")
-	sb.WriteString(si.OS.Name)
-	sb.WriteString(" [")
-	sb.WriteString(si.OS.Architecture)
-	sb.WriteString("]\n")
+	addLine("os:", f2(hostinfo.Platform)+f3(" ["+hostinfo.PlatformVersion+"]"))
 
 	// kernel
-	sb.WriteString("kernel: ")
-	sb.WriteString(si.Kernel.Release)
-	sb.WriteString("\n")
+	addLine("kernel:", f2(hostinfo.KernelVersion)+f3(" ["+hostinfo.KernelArch+"]"))
+
+	// uptime
+	addLine("uptime:", f2((time.Duration(hostinfo.Uptime) * time.Second).String()))
 
 	// CPU
-	sb.WriteString("cpu: ")
-	sb.WriteString(si.CPU.Model)
-	sb.WriteString(" [")
-	sb.WriteString(fmt.Sprint(si.CPU.Cores))
-	sb.WriteString("/")
-	sb.WriteString(fmt.Sprint(si.CPU.Threads))
-	sb.WriteString("]\n")
+	cpuInfo, _ := cpu.Info()
+
+	cpus := map[string]cpu.InfoStat{}
+	cores := map[string]map[string]struct{}{}
+	threads := map[string]int{}
+
+	// count cores and threads
+	for _, c := range cpuInfo {
+		phid := c.PhysicalID
+		cid := c.CoreID
+
+		// add to physical cpus
+		if _, ok := cpus[phid]; !ok {
+			cpus[phid] = c
+		}
+
+		// add to cores
+		if _, ok := cores[phid]; !ok {
+			cores[phid] = make(map[string]struct{})
+		}
+		cores[phid][cid] = struct{}{}
+
+		if _, ok := threads[phid]; !ok {
+			threads[phid] = 0
+		}
+		threads[phid]++
+	}
+
+	for i, c := range cpus {
+		title := ""
+		if i == "0" {
+			title = "cpu:"
+		}
+		addLine(title, f2(c.ModelName)+f3(fmt.Sprintf(" [%d/%d]", len(cores[i]), threads[i])))
+	}
 
 	// Memory
-	memory, err := memory.Get()
-	sb.WriteString("memory: ")
-	if err != nil {
-		sb.WriteString("unknown")
-	} else {
-		sb.WriteString(fmt.Sprintf("%.2fGi used, %.2fGi free (%.2fGi total)", float64(memory.Used)/(1024*1024*1024), float64(memory.Free)/(1024*1024*1024), float64(memory.Total)/(1024*1024*1024)))
+	memory, err := mem.VirtualMemory()
+	memValue := f1("???")
+
+	if err == nil {
+		memValue = f4(fmt.Sprintf("%.2f", float64(memory.Used)/(1024*1024*1024))) + f2(fmt.Sprintf("/%.2fGi", float64(memory.Total)/(1024*1024*1024)))
 	}
-	sb.WriteString("\n")
+	addLine("memory:", memValue)
+	// TODO: usage widget (line)
 
 	// Storage
-	sb.WriteString("storage:\n")
+	addLine("storage:", "")
+
 	for _, disk := range si.Storage {
-		sb.WriteString("  ")
-		sb.WriteString(disk.Name)
-		sb.WriteString(" [")
-		sb.WriteString(fmt.Sprint(disk.Model))
-		sb.WriteString(" ")
-		sb.WriteString(fmt.Sprint(disk.Size))
-		sb.WriteString("GB]\n")
+		addLine("", f2(disk.Name+f3(fmt.Sprintf(" [%s]", disk.Model))))
 	}
 
 	// Network
-	sb.WriteString("network:\n")
-	for i, net := range si.Network {
-		sb.WriteString("  ")
-		sb.WriteString(net.Name)
-		sb.WriteString(" [")
-		sb.WriteString(fmt.Sprint(net.MACAddress))
-		sb.WriteString(" ")
-		sb.WriteString(fmt.Sprint(net.Speed))
-		sb.WriteString("Mbps]")
-		if i < len(si.Network)-1 {
-			sb.WriteString("\n")
-		}
+	addLine("network:", "")
+
+	for _, net := range si.Network {
+		addLine("", f2(net.Name+f3(fmt.Sprintf(" [%s %dMbps]", net.MACAddress, net.Speed))))
 	}
 
 	return WidgetResponse{
