@@ -5,20 +5,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mazznoer/colorgrad"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/host"
+	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/viper"
-	"github.com/zcalusic/sysinfo"
 )
-
-// TODO sysinfo => gopsutil
 
 // SysinfoWidget is a widget that displays the host banner
 func SysinfoWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
-	var si sysinfo.SysInfo
-	si.GetSysInfo()
-
+	// formatters
 	f1 := f("7", "0", false)
 	f2 := f("11", "0", false)
 	f3 := f("2", "0", false)
@@ -39,9 +36,6 @@ func SysinfoWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 
 	// kernel
 	addLine("kernel:", f2(hostinfo.KernelVersion)+f3(" ["+hostinfo.KernelArch+"]"))
-
-	// uptime
-	addLine("uptime:", f2((time.Duration(hostinfo.Uptime) * time.Second).String()))
 
 	// CPU
 	cpuInfo, _ := cpu.Info()
@@ -80,6 +74,13 @@ func SysinfoWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 		addLine(title, f2(c.ModelName)+f3(fmt.Sprintf(" [%d/%d]", len(cores[i]), threads[i])))
 	}
 
+	// uptime
+	addLine("uptime:", f2((time.Duration(hostinfo.Uptime)*time.Second).String())+f3(fmt.Sprintf(" [%d processes]", hostinfo.Procs)))
+
+	// load
+	loadInfo, _ := load.Avg()
+	addLine("load:", f4(fmt.Sprintf("%.2f", loadInfo.Load1))+f3(" (1m) ")+f4(fmt.Sprintf("%.2f", loadInfo.Load5))+f3(" (5m) ")+f4(fmt.Sprintf("%.2f", loadInfo.Load15))+f3(" (15m)"))
+
 	// Memory
 	memory, err := mem.VirtualMemory()
 	memValue := f1("???")
@@ -88,21 +89,10 @@ func SysinfoWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 		memValue = f4(fmt.Sprintf("%.2f", float64(memory.Used)/(1024*1024*1024))) + f2(fmt.Sprintf("/%.2fGi", float64(memory.Total)/(1024*1024*1024)))
 	}
 	addLine("memory:", memValue)
-	// TODO: usage widget (line)
 
-	// Storage
-	addLine("storage:", "")
-
-	for _, disk := range si.Storage {
-		addLine("", f2(disk.Name+f3(fmt.Sprintf(" [%s]", disk.Model))))
-	}
-
-	// Network
-	addLine("network:", "")
-
-	for _, net := range si.Network {
-		addLine("", f2(net.Name+f3(fmt.Sprintf(" [%s %dMbps]", net.MACAddress, net.Speed))))
-	}
+	grad, _ := colorgrad.NewGradient().HtmlColors("#b8bb26", "#fabd2f", "#fb4934").Build()
+	grad2, _ := colorgrad.NewGradient().HtmlColors("#98971a", "#d79921", "#cc241d").Build()
+	addLine("", pbarGradient(memory.UsedPercent, 64, "█", "░", grad, grad2))
 
 	return WidgetResponse{
 		"sysinfo",

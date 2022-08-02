@@ -68,9 +68,11 @@ func renderWidgets(v *viper.Viper) {
 				fmt.Fprintf(os.Stderr, "error rendering widget: %s - %s\n", widget, err)
 			} else {
 				content := output.Content
-				length := len([]rune(content))
-				if length > 0 && content[length-1] == '\n' {
-					content = content[:length-1]
+				rcontent := []rune(content)
+				length := len(rcontent)
+				if length > 0 && rcontent[length-1] == '\n' {
+					rcontent = rcontent[:length-1]
+					content = string(rcontent)
 				}
 				if output.Place == "center" {
 					content = lipgloss.PlaceHorizontal(lipgloss.Width(content), lipgloss.Left, lipgloss.NewStyle().Background(lipgloss.Color("0")).Render(content))

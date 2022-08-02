@@ -8,6 +8,8 @@ import (
 	"github.com/zcalusic/sysinfo"
 )
 
+// TODO sysinfo => gopsutil
+
 // BannerWidget is a widget that displays the host banner
 func BannerWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 	v.SetDefault("banner.file", path.Join(v.GetString("config.path"), "banner.txt"))
