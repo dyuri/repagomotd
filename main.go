@@ -23,24 +23,6 @@ var WIDGETS = map[string]widgets.WidgetFn{
 const widgetWidth = 78
 const widgetPadding = 2
 
-func format(fg, bg string, bold bool) func(string) string {
-	var style lipgloss.Style
-	if fg == "" {
-		fg = "7"
-	}
-	style = lipgloss.NewStyle().Foreground(lipgloss.Color(fg))
-	if bg != "" {
-		style = style.Background(lipgloss.Color(bg))
-	}
-	if bold {
-		style = style.Bold(true)
-	} else {
-		style = style.Bold(false)
-	}
-
-	return style.Render
-}
-
 // TODO parallelize
 func renderWidgets(v *viper.Viper) {
 	var display = strings.Builder{}
@@ -63,7 +45,7 @@ func renderWidgets(v *viper.Viper) {
 
 	for _, widget := range v.GetStringSlice("widgets") {
 		if fn, ok := WIDGETS[widget]; ok {
-			output, err := fn(v, format)
+			output, err := fn(v, widgets.Formatter)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "error rendering widget: %s - %s\n", widget, err)
 			} else {

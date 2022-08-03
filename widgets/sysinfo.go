@@ -92,7 +92,7 @@ func SysinfoWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 
 	grad, _ := colorgrad.NewGradient().HtmlColors("#b8bb26", "#fabd2f", "#fb4934").Build()
 	grad2, _ := colorgrad.NewGradient().HtmlColors("#98971a", "#d79921", "#cc241d").Build()
-	addLine("", pbarGradient(memory.UsedPercent, 64, "█", "░", grad, grad2))
+	addLine("", PBarGradient(memory.UsedPercent, 64, "█", "░", grad, grad2))
 
 	return WidgetResponse{
 		"sysinfo",

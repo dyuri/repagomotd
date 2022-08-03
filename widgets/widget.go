@@ -17,7 +17,25 @@ type WidgetResponse struct {
 	Place   string
 }
 
-func pbar(percentage float64, width int, bar, space string) string {
+func Formatter(fg, bg string, bold bool) func(string) string {
+	var style lipgloss.Style
+	if fg == "" {
+		fg = "7"
+	}
+	style = lipgloss.NewStyle().Foreground(lipgloss.Color(fg))
+	if bg != "" {
+		style = style.Background(lipgloss.Color(bg))
+	}
+	if bold {
+		style = style.Bold(true)
+	} else {
+		style = style.Bold(false)
+	}
+
+	return style.Render
+}
+
+func PBar(percentage float64, width int, bar, space string) string {
 	if percentage > 100 {
 		percentage = 100
 	}
@@ -28,7 +46,7 @@ func pbar(percentage float64, width int, bar, space string) string {
 	return strings.Repeat(bar, blength) + strings.Repeat(space, width-blength)
 }
 
-func pbarColor(percentage float64, width int, bar, space string, activeColor, inactiveColor string) string {
+func PBarColor(percentage float64, width int, bar, space string, activeColor, inactiveColor string) string {
 	if percentage > 100 {
 		percentage = 100
 	}
@@ -41,7 +59,7 @@ func pbarColor(percentage float64, width int, bar, space string, activeColor, in
 	return activeStyle.Render(strings.Repeat(bar, blength)) + inactiveStyle.Render(strings.Repeat(space, width-blength))
 }
 
-func pbarGradient(percentage float64, width int, bar, space string, activeGrad, inactiveGrad colorgrad.Gradient) string {
+func PBarGradient(percentage float64, width int, bar, space string, activeGrad, inactiveGrad colorgrad.Gradient) string {
 	if percentage > 100 {
 		percentage = 100
 	}
@@ -59,3 +77,5 @@ func pbarGradient(percentage float64, width int, bar, space string, activeGrad, 
 
 	return pb
 }
+
+// TODO Border, BorderColor, BorderGradient
