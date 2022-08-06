@@ -23,7 +23,7 @@ func SysinfoWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 	sb := strings.Builder{}
 
 	addLine := func(title, value string) {
-		fmt.Fprintf(&sb, "%s %s\n", f1(fmt.Sprintf("%9s", title)), value)
+		fmt.Fprintf(&sb, "%s %s\n", f1(fmt.Sprintf("%8s", title)), value)
 	}
 
 	hostinfo, _ := host.Info()
