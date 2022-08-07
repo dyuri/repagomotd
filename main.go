@@ -6,8 +6,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/dyuri/go-repamotd/widgets"
+	"github.com/mazznoer/colorgrad"
 	"github.com/spf13/viper"
 )
 
@@ -32,7 +32,8 @@ func renderWidgets(v *viper.Viper) {
 			}
 		}
 	}
-	fmt.Println(widgets.Border(widgetContents, lipgloss.NewStyle().Foreground(lipgloss.Color("4"))))
+	bgrad, _ := colorgrad.NewGradient().HtmlColors("#689d6a", "#458588", "#b16286").Build()
+	fmt.Println(widgets.BorderGradient(widgetContents, bgrad))
 }
 
 func main() {

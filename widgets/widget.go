@@ -85,6 +85,10 @@ func PBarColor(percentage float64, width int, bar, space string, activeColor, in
 	return activeStyle.Render(strings.Repeat(bar, blength)) + inactiveStyle.Render(strings.Repeat(space, width-blength))
 }
 
+func gradStyle(grad colorgrad.Gradient, phase float64) lipgloss.Style {
+	return lipgloss.NewStyle().Foreground(lipgloss.Color(grad.At(phase).Hex()))
+}
+
 func PBarGradient(percentage float64, width int, bar, space string, activeGrad, inactiveGrad colorgrad.Gradient) string {
 	if percentage > 100 {
 		percentage = 100
@@ -95,10 +99,10 @@ func PBarGradient(percentage float64, width int, bar, space string, activeGrad, 
 	pb := ""
 	blength := int(percentage / 100 * float64(width))
 	for i := 0; i < blength; i++ {
-		pb += lipgloss.NewStyle().Foreground(lipgloss.Color(activeGrad.At(float64(i) / float64(width)).Hex())).Render(bar)
+		pb += gradStyle(activeGrad, float64(i)/float64(width)).Render(bar)
 	}
 	for i := blength; i < width; i++ {
-		pb += lipgloss.NewStyle().Foreground(lipgloss.Color(inactiveGrad.At(float64(i) / float64(width)).Hex())).Render(space)
+		pb += gradStyle(inactiveGrad, float64(i)/float64(width)).Render(space)
 	}
 
 	return pb
@@ -170,4 +174,56 @@ func Border(contents []string, borderStyle lipgloss.Style) string {
 	return content.String()
 }
 
-// TODO BorderGradient
+func BorderGradient(contents []string, grad colorgrad.Gradient) string {
+	content := strings.Builder{}
+	boxStyle := lipgloss.NewStyle()
+	widgetWidth := GetWidgetWidth()
+	boxStyle = boxStyle.MaxWidth(widgetWidth - 2)
+
+	// calculate length of gradient
+	glength := float64(widgetWidth)
+	for _, c := range contents {
+		glength += float64(strings.Count(c, "\n")) + 1 // +1 for last newline
+	}
+
+	ch := 0
+
+	// first line
+	content.WriteString(gradStyle(grad, 0).Render(normalBorder.TopLeft))
+	for i := 0; i < widgetWidth-2; i++ {
+		content.WriteString(gradStyle(grad, float64(i+1)/glength).Render(normalBorder.Horizontal))
+	}
+	content.WriteString(gradStyle(grad, float64(widgetWidth)/glength).Render(normalBorder.TopRight))
+	content.WriteString("\n")
+
+	for i, c := range contents {
+		if i != 0 {
+			// middle line
+			content.WriteString(gradStyle(grad, float64(ch+1)/glength).Render(normalBorder.VerticalLeft))
+			for i := 0; i < widgetWidth-2; i++ {
+				content.WriteString(gradStyle(grad, float64(ch+i+2)/glength).Render(normalBorder.Horizontal))
+			}
+			content.WriteString(gradStyle(grad, float64(ch+widgetWidth-1)/glength).Render(normalBorder.VerticalRight))
+			content.WriteString("\n")
+			ch += 1
+		}
+
+		for _, line := range strings.Split(strings.TrimRight(boxStyle.Render(c), "\n"), "\n") {
+			content.WriteString(gradStyle(grad, float64(ch+1)/glength).Render(normalBorder.Vertical))
+			content.WriteString(line)
+			content.WriteString(gradStyle(grad, float64(ch+widgetWidth-1)/glength).Render(normalBorder.Vertical))
+			content.WriteString("\n")
+			ch += 1
+		}
+	}
+
+	// last line
+	content.WriteString(gradStyle(grad, float64(ch)/glength).Render(normalBorder.BottomLeft))
+	for i := 0; i < widgetWidth-2; i++ {
+		content.WriteString(gradStyle(grad, float64(ch+i+1)/glength).Render(normalBorder.Horizontal))
+	}
+	content.WriteString(gradStyle(grad, 1).Render(normalBorder.BottomRight))
+	content.WriteString("\n")
+
+	return content.String()
+}
