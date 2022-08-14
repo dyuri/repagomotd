@@ -21,7 +21,6 @@ func DiskWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 	grad2, _ := colorgrad.NewGradient().HtmlColors("#484d00", "#5e4e00", "#500000").Build()
 
 	configuredPartitions := v.GetStringSlice("disk.partitions")
-	fmt.Println(configuredPartitions)
 
 	var mps []string
 	if len(configuredPartitions) == 0 {
