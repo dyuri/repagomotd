@@ -89,7 +89,11 @@ func gradStyle(grad colorgrad.Gradient, phase float64) lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color(grad.At(phase).Hex()))
 }
 
-func PBarGradient(percentage float64, width int, bar, space string, activeGrad, inactiveGrad colorgrad.Gradient) string {
+func bgGradStyle(bgrad, fgrad colorgrad.Gradient, phase float64) lipgloss.Style {
+	return lipgloss.NewStyle().Background(lipgloss.Color(bgrad.At(phase).Hex())).Foreground(lipgloss.Color(fgrad.At(phase).Hex()))
+}
+
+func PBarGradient(percentage float64, width int, activeGrad, inactiveGrad colorgrad.Gradient, ltext, rtext string) string {
 	if percentage > 100 {
 		percentage = 100
 	}
@@ -97,12 +101,29 @@ func PBarGradient(percentage float64, width int, bar, space string, activeGrad, 
 		percentage = 0
 	}
 	pb := ""
+	ch := ""
+	lchars := []rune(ltext)
+	rchars := []rune(rtext)
 	blength := int(percentage / 100 * float64(width))
 	for i := 0; i < blength; i++ {
-		pb += gradStyle(activeGrad, float64(i)/float64(width)).Render(bar)
+		if i < len(lchars) {
+			ch = string(lchars[i])
+		} else if i > width-len(rchars) {
+			ch = string(rchars[i-width+len(rchars)])
+		} else {
+			ch = " "
+		}
+		pb += bgGradStyle(activeGrad, inactiveGrad, float64(i)/float64(width)).Render(ch)
 	}
 	for i := blength; i < width; i++ {
-		pb += gradStyle(inactiveGrad, float64(i)/float64(width)).Render(space)
+		if i > width-len(rchars) {
+			ch = string(rchars[i-width+len(rchars)])
+		} else if i < len(lchars) {
+			ch = string(lchars[i])
+		} else {
+			ch = " "
+		}
+		pb += bgGradStyle(inactiveGrad, activeGrad, float64(i)/float64(width)).Render(ch)
 	}
 
 	return pb
@@ -138,13 +159,14 @@ func AlignContent(output WidgetResponse) string {
 	}
 
 	if output.Place == "center" {
-		content = lipgloss.PlaceHorizontal(lipgloss.Width(content), lipgloss.Left, lipgloss.NewStyle().Background(lipgloss.Color("0")).Render(content))
+		content = lipgloss.PlaceHorizontal(lipgloss.Width(content), lipgloss.Left, content)
 		content = lipgloss.PlaceHorizontal(widgetWidth-2*widgetPadding, lipgloss.Center, content)
 	}
 
 	return boxStyle.Render(content)
 }
 
+// TODO display widget name in top border
 func Border(contents []string, borderStyle lipgloss.Style) string {
 	content := strings.Builder{}
 	boxStyle := lipgloss.NewStyle()
@@ -174,6 +196,7 @@ func Border(contents []string, borderStyle lipgloss.Style) string {
 	return content.String()
 }
 
+// TODO display widget name in top border
 func BorderGradient(contents []string, grad colorgrad.Gradient) string {
 	content := strings.Builder{}
 	boxStyle := lipgloss.NewStyle()

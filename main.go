@@ -16,6 +16,11 @@ var WIDGETS = map[string]widgets.WidgetFn{
 	"naptar":  widgets.NaptarWidget,
 	"banner":  widgets.BannerWidget,
 	"sysinfo": widgets.SysinfoWidget,
+	"disk":    widgets.DiskWidget,
+	// TODO
+	// "memory":  widgets.MemoryWidget,
+	// "process": widgets.ProcessWidget,
+	// "network": widgets.NetworkWidget,
 }
 
 // TODO parallelize
@@ -57,6 +62,7 @@ func main() {
 	viper.SetDefault("widgets", []string{
 		"banner",
 		"sysinfo",
+		"disk",
 		"naptar",
 	})
 

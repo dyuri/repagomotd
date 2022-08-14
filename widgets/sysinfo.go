@@ -16,14 +16,14 @@ import (
 // SysinfoWidget is a widget that displays the host banner
 func SysinfoWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 	// formatters
-	f1 := f("7", "0", false)
-	f2 := f("11", "0", false)
-	f3 := f("2", "0", false)
-	f4 := f("10", "0", true)
+	f1 := f("7", "", false)
+	f2 := f("11", "", false)
+	f3 := f("2", "", false)
+	f4 := f("10", "", true)
 	sb := strings.Builder{}
 
 	addLine := func(title, value string) {
-		fmt.Fprintf(&sb, "%s %s\n", f1(fmt.Sprintf("%8s", title)), value)
+		fmt.Fprintf(&sb, "%s %s\n", f1(fmt.Sprintf("%9s", title)), value)
 	}
 
 	hostinfo, _ := host.Info()
@@ -91,8 +91,8 @@ func SysinfoWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 	addLine("memory:", memValue)
 
 	grad, _ := colorgrad.NewGradient().HtmlColors("#b8bb26", "#fabd2f", "#fb4934").Build()
-	grad2, _ := colorgrad.NewGradient().HtmlColors("#98971a", "#d79921", "#cc241d").Build()
-	addLine("", PBarGradient(memory.UsedPercent, 64, "█", "░", grad, grad2))
+	grad2, _ := colorgrad.NewGradient().HtmlColors("#484d00", "#5e4e00", "#500000").Build()
+	addLine("", PBarGradient(memory.UsedPercent, 64, grad, grad2, "", fmt.Sprintf(" %.0f%% ", memory.UsedPercent)))
 
 	return WidgetResponse{
 		"sysinfo",
