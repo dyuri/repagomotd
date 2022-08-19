@@ -90,7 +90,7 @@ func gradStyle(grad colorgrad.Gradient, phase float64) lipgloss.Style {
 }
 
 func bgGradStyle(bgrad, fgrad colorgrad.Gradient, phase float64) lipgloss.Style {
-	return lipgloss.NewStyle().Background(lipgloss.Color(bgrad.At(phase).Hex())).Foreground(lipgloss.Color(fgrad.At(phase).Hex()))
+	return lipgloss.NewStyle().Background(lipgloss.Color(bgrad.At(phase).Hex())).Foreground(lipgloss.Color(fgrad.At(phase).Hex())).Bold(true)
 }
 
 func PBarGradient(percentage float64, width int, activeGrad, inactiveGrad colorgrad.Gradient, ltext, rtext string) string {
