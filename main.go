@@ -18,8 +18,7 @@ var WIDGETS = map[string]widgets.WidgetFn{
 	"sysinfo": widgets.SysinfoWidget,
 	"disk":    widgets.DiskWidget,
 	"network": widgets.NetworkWidget,
-	// TODO
-	// "process": widgets.ProcessWidget,
+	"docker":  widgets.DockerWidget,
 }
 
 // TODO parallelize
@@ -63,6 +62,7 @@ func main() {
 		"sysinfo",
 		"disk",
 		"network",
+		"docker",
 		"naptar",
 	})
 
