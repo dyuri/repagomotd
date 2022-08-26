@@ -37,7 +37,7 @@ func renderWidgets(v *viper.Viper) {
 		}
 	}
 	bgrad, _ := colorgrad.NewGradient().HtmlColors("#689d6a", "#458588", "#b16286").Build()
-	fmt.Println(widgets.BorderGradient(widgetContents, bgrad))
+	fmt.Print(widgets.BorderGradient(widgetContents, bgrad))
 }
 
 func main() {
