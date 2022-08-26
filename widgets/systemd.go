@@ -33,8 +33,6 @@ func SystemdWidget(v *viper.Viper, f formatFn) (WidgetResponse, error) {
 		sb.WriteString(f1("All services ") + f2("OK"))
 	}
 
-	fmt.Println(units)
-
 	return WidgetResponse{
 		"systemd",
 		sb.String(),
