@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/charmbracelet/lipgloss v0.5.0
+	github.com/coreos/go-systemd/v22 v22.3.2
 	github.com/mazznoer/colorgrad v0.9.0
 	github.com/shirou/gopsutil/v3 v3.22.6
 	github.com/spf13/viper v1.12.0
@@ -14,6 +15,7 @@ require (
 require (
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
+	github.com/godbus/dbus/v5 v5.0.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
