@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/coreos/go-systemd/v22 v22.3.2
+	github.com/dyuri/go-figure v0.1.0
 	github.com/mazznoer/colorgrad v0.9.0
 	github.com/shirou/gopsutil/v3 v3.22.6
 	github.com/spf13/viper v1.12.0

@@ -45,10 +45,10 @@ var normalBorder = BorderChars{
 
 func Formatter(fg, bg string, bold bool) func(string) string {
 	var style lipgloss.Style
-	if fg == "" {
-		fg = "7"
+	style = lipgloss.NewStyle()
+	if fg != "" {
+		style = style.Foreground(lipgloss.Color(fg))
 	}
-	style = lipgloss.NewStyle().Foreground(lipgloss.Color(fg))
 	if bg != "" {
 		style = style.Background(lipgloss.Color(bg))
 	}
